@@ -303,7 +303,9 @@ jet2_t D(const jet3_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\
     result.fv  = x.fvv;
     result.fuv = x.fuvv;
   }else{
-    result.f   = result.fu = result.fv =
+    result.f   = 0;
+    result.fu  = 0;
+    result.fv  = 0;
     result.fuv = 0;
   }
   return result;
@@ -620,11 +622,11 @@ jet3_t FSInterp(jet3_t x){
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-vec_jet3_t Stage0(jet3_t u, jet3_t v){  return Straight(u, v, 1, 1, 1);  }
-vec_jet3_t Stage1(jet3_t u, jet3_t v){  return Arc(u, v, 1, 1, 1);  }
-vec_jet3_t Stage2(jet3_t u, jet3_t v){  return InterpolateVec(Arc(Param1(u), v, 0.9, 0.9,-1), Arc(Param2(u), v, 1, 1, 0.5),  UInterp(u));  }
-vec_jet3_t Stage3(jet3_t u, jet3_t v){  return InterpolateVec(Arc(Param1(u), v,-0.9,-0.9,-1), Arc(Param2(u), v,-1, 1,-0.5), UInterp(u));  }
-vec_jet3_t Stage4(jet3_t u, jet3_t v){  return Arc(u, v, -1,-1, -1);  }
+vec_jet3_t Stage0(jet3_t u, jet3_t v){  return Straight(u,v,1,1,1);  }
+vec_jet3_t Stage1(jet3_t u, jet3_t v){  return Arc(u,v,1,1,1);  }
+vec_jet3_t Stage2(jet3_t u, jet3_t v){  return InterpolateVec(Arc(Param1(u),v, 0.9, 0.9,-1), Arc(Param2(u),v, 1,1, .5), UInterp(u));  }
+vec_jet3_t Stage3(jet3_t u, jet3_t v){  return InterpolateVec(Arc(Param1(u),v,-0.9,-0.9,-1), Arc(Param2(u),v,-1,1,-.5), UInterp(u));  }
+vec_jet3_t Stage4(jet3_t u, jet3_t v){  return Arc(u,v,-1,1,-1);  }
 
 vec_jet3_t Scene01(jet3_t u, jet3_t v, f64 t){  return InterpolateVec(Stage0(u,v), Stage1(u,v), TInterp(t));  }
 vec_jet3_t Scene12(jet3_t u, jet3_t v, f64 t){  return InterpolateVec(Stage1(u,v), Stage2(u,v), TInterp(t));  }
@@ -793,17 +795,15 @@ int bezier  = 0;
 int nstrips = NSTRIPS;
 
 char USAGE[] = 
-"Usage.  evert [-time T] [-nstrips N] [-scale S] [-bezier]\n\
-  [-umin Umin] [-umax Umax]  [-du Ustep]\n[-vmin Vmin] [-vmax Vmax]  [-dv Vstep]\n\n\
-Generate an everting sphere in Geomview/OOGL MESH or (if -bezier) Bezier form, at eversion time T, for T at least 0 and at most 1.\n\n\
-Surface (of T := 0 sphere) parametrized by\n\
-  \"u\": u=0 at +Z pole, u=1 at equator, u=2 at -Z pole,\n\
-  \"v\": v=0 at +Y, increasing toward +X, v=1 at longitude 2pi/(number of strips)\n\n\
-Emits slice ranging in u from Umin..Umax, v from Vmin..Vmax, with each OOGL MESH (or Bezier) element spanning range Ustep x Vstep.\n\n\
-With -whole, include transformations to replicate [0..1,0..1] to whole sphere.\n\
-strip, plus every other strip in +Z hemisphere; numbers range 0 .. nstrips-1.\n\n\
-Eversion stages corrugate-push-twist-unpush begin at times given by -corr -push -twist -unpush respectively.  Produces radius-S sphere.\n\n\
-  Defaults:\n-time 0 -nstrips 8 -scale 1 -umin 0 -umax 1  -du .08333  -vmin 0  -vmax 1  -dv .08333 -corr 0 -push .1 -twist .23 -unpush .6 -uncorr .93";
+"USAGE  ./evert [-time T] [-bezier] [-nstrips N] [-scale S] [-umin Umin] [-umax Umax] [-du Ustep] [-vmin Vmin] [-vmax Vmax]  [-dv Vstep]\n\n\
+Generate an everting sphere in \x1b[32mGeomview/OOGL MESH\x1b[0m format (by default) or in \x1b[32mBezier\x1b[0m format (if -bezier) at eversion time T, as T ranges from 0 to 1.\n\n\
+Surface (which, at time 0 is a sphere) parametrized by\n\
+  parameter \x1b[31mu\x1b[0m:  \x1b[31mu\x1b[0m:=0 at +Z pole,  \x1b[31mu\x1b[0m:=1 at equator,  \x1b[31mu\x1b[0m:=2 at -Z pole,\n\
+  parameter \x1b[31mv\x1b[0m:  \x1b[31mv\x1b[0m:=0 at +Y, increasing toward +X,  \x1b[31mv\x1b[0m:=1 at longitude tau/(number of strips)\n\n\
+Emits slice where parameter \x1b[31mu\x1b[0m ranges in the interval \x1b[31m[Umin .. Umax]\x1b[0m and parameter \x1b[31mv\x1b[0m ranges in the interval \x1b[31m[Vmin .. Vmax]\x1b[0m,\n\
+with each \x1b[32mOOGL MESH\x1b[0m (or \x1b[32mBezier\x1b[0m) element spanning the range \x1b[31mUstep x Vstep\x1b[0m.\n\n\
+Eversion stages corrugate-push-twist-unpush begin at times given by constants inside the code. Produces radius-S sphere.\n\n\
+DEFAULTS  -time 0  -nstrips 8 -scale 1  -umin 0 -umax 1 -du .08333  -vmin 0  -vmax 1 -dv .08333";
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 int main(int argc, char** argv){
@@ -826,15 +826,15 @@ int main(int argc, char** argv){
   argv++;
   while(--argc){
     if(     !strcmp("-time",   argv[0])){  time    = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-umin",   argv[0])){  umin    = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-umax",   argv[0])){  umax    = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-vmin",   argv[0])){  vmin    = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-vmax",   argv[0])){  vmax    = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-du",     argv[0])){  du      = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-dv",     argv[0])){  dv      = atof(argv[1]);  argv++; argc--;  }
+    else if(!strcmp("-bezier", argv[0])){  bezier  = 1;  }
     else if(!strcmp("-nstrips",argv[0])){  nstrips = atoi(argv[1]);  argv++; argc--;  }
     else if(!strcmp("-scale",  argv[0])){  scale   = atof(argv[1]);  argv++; argc--;  }
-    else if(!strcmp("-bezier", argv[0])){  bezier  = 1;  }
+    else if(!strcmp("-umin",   argv[0])){  umin    = atof(argv[1]);  argv++; argc--;  }
+    else if(!strcmp("-umax",   argv[0])){  umax    = atof(argv[1]);  argv++; argc--;  }
+    else if(!strcmp("-du",     argv[0])){  du      = atof(argv[1]);  argv++; argc--;  }
+    else if(!strcmp("-vmin",   argv[0])){  vmin    = atof(argv[1]);  argv++; argc--;  }
+    else if(!strcmp("-vmax",   argv[0])){  vmax    = atof(argv[1]);  argv++; argc--;  }
+    else if(!strcmp("-dv",     argv[0])){  dv      = atof(argv[1]);  argv++; argc--;  }
     else{  printf("evert: Unrecognized argument \"%s\"\n", argv[0]);  return 1;  }
     argv++;
   }
