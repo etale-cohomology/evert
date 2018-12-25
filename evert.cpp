@@ -1,6 +1,12 @@
 /*
 g++ evert.cpp -o evert && ./evert -time 0.90
-make && ./evert -time 0.90
+time make evert && ./evert -time 0.90
+
+time make release && ./evert -time 0.90
+time make -j28 oogl
+time make -j28 bezier
+
+time make -j28 oogl && geomview geom_00.oogl & disown
 */
 #include <stdio.h>
 #include <string.h>
@@ -14,6 +20,7 @@ typedef  double    f64;
 typedef  float     f32;
 
 #define SEP "\n-------------------------------------------------------------------------------------------------------------------------------\x1b[31m#\x1b[0m"
+#define M_TAU (2. * M_PI)
 
 
 // ----------------------------------------------------------------------------------------------------------------------------#
@@ -142,7 +149,7 @@ jet2_t Cos(const jet2_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \
                 c*t.fuv - s*t.fu*t.fv);
 }
 
-jet2_t Annihilate( const jet2_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+jet2_t Annihilate(const jet2_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   return jet2_t(x.f,
                 index == 1 ? x.fu : 0,
                 index == 0 ? x.fv : 0,
@@ -197,12 +204,12 @@ class jet3_t{
 // ----------------------------------------------------------------------------------------------------------------------------#
 jet3_t operator+(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   jet3_t result;
-  result.f    = x.f + y.f;
-  result.fu   = x.fu + y.fu;
-  result.fv   = x.fv + y.fv;
-  result.fuu  = x.fuu + y.fuu;
-  result.fuv  = x.fuv + y.fuv;
-  result.fvv  = x.fvv + y.fvv;
+  result.f    = x.f    + y.f;
+  result.fu   = x.fu   + y.fu;
+  result.fv   = x.fv   + y.fv;
+  result.fuu  = x.fuu  + y.fuu;
+  result.fuv  = x.fuv  + y.fuv;
+  result.fvv  = x.fvv  + y.fvv;
   result.fuuv = x.fuuv + y.fuuv;
   result.fuvv = x.fuvv + y.fuvv;
   return result;
@@ -211,11 +218,11 @@ jet3_t operator+(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:
 jet3_t operator*(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   jet3_t result;
   result.f    = x.f*y.f;
-  result.fu   = x.f*y.fu + x.fu*y.f;
-  result.fv   = x.f*y.fv + x.fv*y.f;
-  result.fuu  = x.f*y.fuu + 2*x.fu*y.fu + x.fuu*y.f;
-  result.fuv  = x.f*y.fuv + x.fu*y.fv + x.fv*y.fu + x.fuv*y.f;
-  result.fvv  = x.f*y.fvv + 2*x.fv*y.fv + x.fvv*y.f;
+  result.fu   = x.f*y.fu   + x.fu*y.f;
+  result.fv   = x.f*y.fv   + x.fv*y.f;
+  result.fuu  = x.f*y.fuu  + 2*x.fu*y.fu  + x.fuu*y.f;
+  result.fuv  = x.f*y.fuv  +   x.fu*y.fv  + x.fv*y.fu + x.fuv*y.f;
+  result.fvv  = x.f*y.fvv  + 2*x.fv*y.fv  + x.fvv*y.f;
   result.fuuv = x.f*y.fuuv + 2*x.fu*y.fuv + x.fv*y.fuu + 2*x.fuv*y.fu + x.fuu*y.fv + x.fuuv*y.f;
   result.fuvv = x.f*y.fuvv + 2*x.fv*y.fuv + x.fu*y.fvv + 2*x.fuv*y.fv + x.fvv*y.fu + x.fuvv*y.f;
   return result;
@@ -532,11 +539,6 @@ jet3_t Length(vec_jet3_t v){  return (v.x^2 + v.y^2) ^ (.5);  }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 // ----------------------------------------------------------------------------------------------------------------------------#
-#define NSTRIPS 8
-
-// ----------------------------------------------------------------------------------------------------------------------------#
-extern int nstrips;
-
 vec_jet2_t FigureEight(vec_jet2_t w, vec_jet2_t h, vec_jet2_t bend, jet2_t form, jet2_t v){
   jet2_t height;
   v      %= 1;
@@ -547,7 +549,7 @@ vec_jet2_t FigureEight(vec_jet2_t w, vec_jet2_t h, vec_jet2_t bend, jet2_t form,
   return w*Sin(v*2.) + (h) * (Interpolate((Cos(v) + -.1) * (-2.), height, form));
 }
   
-vec_jet2_t AddFigureEight(vec_jet3_t p, jet3_t u, jet2_t v, jet3_t form, jet3_t scale){
+vec_jet2_t AddFigureEight(vec_jet3_t p, jet3_t u, jet2_t v, jet3_t form, jet3_t scale, int nstrips){
   jet3_t size   = form*scale;
   form          = form*2. + form*form*-1.;
   vec_jet2_t dv = AnnihilateVec(D(p, 1), 1);
@@ -639,12 +641,13 @@ vec_jet3_t Scene23(jet3_t u, jet3_t v, f64 t){
 vec_jet3_t Scene34(jet3_t u, jet3_t v, f64 t){  return InterpolateVec(Stage3(u,v), Stage4(u,v), TInterp(t));  }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-vec_jet2_t BendIn(     jet3_t u, jet3_t v, f64 t){  t = TInterp(t);          return AddFigureEight(Scene01(u,jet3_t(0,0,1),t), u,v, jet3_t(0,0,0),             FSInterp(u));  }
-vec_jet2_t Corrugate(  jet3_t u, jet3_t v, f64 t){  t = TInterp(t);          return AddFigureEight(Stage1( u,jet3_t(0,0,1)),   u,v, FFInterp(u)*jet3_t(t,0,0), FSInterp(u));  }
-vec_jet2_t PushThrough(jet3_t u, jet3_t v, f64 t){                           return AddFigureEight(Scene12(u,jet3_t(0,0,1),t), u,v, FFInterp(u),               FSInterp(u));  }
-vec_jet2_t Twist(      jet3_t u, jet3_t v, f64 t){                           return AddFigureEight(Scene23(u,jet3_t(0,0,1),t), u,v, FFInterp(u),               FSInterp(u));  }
-vec_jet2_t UnPush(     jet3_t u, jet3_t v, f64 t){                           return AddFigureEight(Scene34(u,jet3_t(0,0,1),t), u,v, FFInterp(u),               FSInterp(u));  }
-vec_jet2_t UnCorrugate(jet3_t u, jet3_t v, f64 t){  t = TInterp((t)*(-1)+1); return AddFigureEight(Stage4( u,jet3_t(0,0,1)),   u,v, FFInterp(u)*jet3_t(t,0,0), FSInterp(u));  }
+extern int nstrips;
+vec_jet2_t BendIn(     jet3_t u, jet3_t v, f64 t){  t = TInterp(t);          return AddFigureEight(Scene01(u,jet3_t(0,0,1),t), u,v, jet3_t(0,0,0),             FSInterp(u), nstrips);  }
+vec_jet2_t Corrugate(  jet3_t u, jet3_t v, f64 t){  t = TInterp(t);          return AddFigureEight(Stage1( u,jet3_t(0,0,1)),   u,v, FFInterp(u)*jet3_t(t,0,0), FSInterp(u), nstrips);  }
+vec_jet2_t PushThrough(jet3_t u, jet3_t v, f64 t){                           return AddFigureEight(Scene12(u,jet3_t(0,0,1),t), u,v, FFInterp(u),               FSInterp(u), nstrips);  }
+vec_jet2_t Twist(      jet3_t u, jet3_t v, f64 t){                           return AddFigureEight(Scene23(u,jet3_t(0,0,1),t), u,v, FFInterp(u),               FSInterp(u), nstrips);  }
+vec_jet2_t UnPush(     jet3_t u, jet3_t v, f64 t){                           return AddFigureEight(Scene34(u,jet3_t(0,0,1),t), u,v, FFInterp(u),               FSInterp(u), nstrips);  }
+vec_jet2_t UnCorrugate(jet3_t u, jet3_t v, f64 t){  t = TInterp((t)*(-1)+1); return AddFigureEight(Stage4( u,jet3_t(0,0,1)),   u,v, FFInterp(u)*jet3_t(t,0,0), FSInterp(u), nstrips);  }
 
 
 // ----------------------------------------------------------------------------------------------------------------------------#
@@ -652,17 +655,15 @@ vec_jet2_t UnCorrugate(jet3_t u, jet3_t v, f64 t){  t = TInterp((t)*(-1)+1); ret
 typedef vec_jet2_t surface_time_fn(jet3_t u, jet3_t v, f64 t);
 
 extern int bezier;
-extern int nstrips;
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-void print_point(vec_jet2_t p, f64 ps, f64 pus, f64 pvs, f64 puvs){
-  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
+void print_point(vec_jet2_t p, f64 ps, f64 pus, f64 pvs, f64 puvs){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
   if(bezier){
     f64 xyz[3];
     xyz[0] = f64(p.x)*ps + p.x.df_du()*pus/3. + p.x.df_dv()*pvs/3. + p.x.d2f_dudv()*puvs/9.;
     xyz[1] = f64(p.y)*ps + p.y.df_du()*pus/3. + p.y.df_dv()*pvs/3. + p.y.d2f_dudv()*puvs/9.;
     xyz[2] = f64(p.z)*ps + p.z.df_du()*pus/3. + p.z.df_dv()*pvs/3. + p.z.d2f_dudv()*puvs/9.;
-    printf("%g %g %g\n", xyz[0], xyz[1], xyz[2]);
+    printf("%9.6f %9.6f %9.6f\n", xyz[0], xyz[1], xyz[2]);
   }else{
     f64 x  = f64(p.x)*ps ;
     f64 y  = f64(p.y)*ps ;
@@ -672,13 +673,13 @@ void print_point(vec_jet2_t p, f64 ps, f64 pus, f64 pvs, f64 puvs){
     f64 nz = p.x.df_du()*p.y.df_dv()-p.y.df_du()*p.x.df_dv();
     f64 s  = nx*nx + ny*ny + nz*nz;
     if(s > 0)  s = sqrt(1/s);
-    printf("%f %f %f    %f %f %f\n", x, y, z, nx*s, ny*s, nz*s);
+    printf("%9.6f %9.6f %9.6f    %9.6f %9.6f %9.6f\n", x, y, z, nx*s, ny*s, nz*s);
   }
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-void print_mesh(vec_jet2_t p){  // Main mesh-printing function?
-  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
+// Main mesh-printing function!
+void print_mesh(vec_jet2_t p){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
   f64 x  = f64(p.x);
   f64 y  = f64(p.y);
   f64 z  = f64(p.z);
@@ -691,8 +692,7 @@ void print_mesh(vec_jet2_t p){  // Main mesh-printing function?
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-void print_spline(vec_jet2_t v00, vec_jet2_t v01, vec_jet2_t v10, vec_jet2_t v11, f64 us, f64 vs, f64 s0, f64 s1, f64 t0, f64 t1){ 
-  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
+void print_spline(vec_jet2_t v00, vec_jet2_t v01, vec_jet2_t v10, vec_jet2_t v11, f64 us, f64 vs, f64 s0, f64 s1, f64 t0, f64 t1){   // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
   if(bezier){
     print_point(v00, 1,  0, 0, 0);
     print_point(v00, 1, us, 0, 0);
@@ -713,7 +713,7 @@ void print_spline(vec_jet2_t v00, vec_jet2_t v01, vec_jet2_t v10, vec_jet2_t v11
     print_point(v01, 1, us, 0, 0);
     print_point(v11, 1,-us, 0, 0);
     print_point(v11, 1, 0, 0, 0);
-    printf("%g %g  %g %g  %g %g  %g %g\n\n", s0,t0,  s1,t0,  s0,t1, s1,t1);
+    printf("%9.6f %9.6f    %9.6f %9.6f    %9.6f %9.6f    %9.6f %9.6f\n\n", s0,t0,  s1,t0,  s0,t1, s1,t1);
   }else{
     print_point(v00, 1, us, vs, us*vs);
     print_point(v10, 1, us, vs, us*vs);
@@ -728,8 +728,7 @@ f64 calc_speed_v(vec_jet2_t v){  return sqrt(sqr(v.x.df_dv()) + sqr(v.y.df_dv())
 f64 calc_speed_u(vec_jet2_t v){  return sqrt(sqr(v.x.df_du()) + sqr(v.y.df_du()) + sqr(v.z.df_du()));  }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f64 vmax, f64 adv, f64 t){
-  puts(SEP); printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
+void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f64 vmax, f64 adv, f64 t){  // puts(SEP); printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
   int jmax = (fabs(umax-umin)/adu + .5);  if(jmax == 0)  jmax = 1;
   int kmax = (fabs(vmax-vmin)/adv + .5);  if(kmax == 0)  kmax = 1;
   f64 du   = (umax-umin) / jmax;
@@ -737,7 +736,7 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
 
   // ----------------------------------------------------------------------------------------------------------------------------#
   f64 u, v;
-  static vec_jet2_t** values = (vec_jet2_t**)calloc(jmax+1, sizeof(vec_jet2_t*));
+  vec_jet2_t** values = (vec_jet2_t**)calloc(jmax+1, sizeof(vec_jet2_t*));
   f64*  speedv = (f64*) calloc(jmax+1, sizeof(f64));
   f64** speedu = (f64**)calloc(jmax+1, sizeof(f64*));
 
@@ -752,7 +751,7 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
     }
     for(int k=0; k <= kmax; ++k){
       v = vmin + k*dv;
-      values[j][k] = (*func)(jet3_t(u, 1, 0), jet3_t(v, 0, 1), t);
+        values[j][k] = (*func)(jet3_t(u, 1, 0), jet3_t(v, 0, 1), t);
       speedu[j][k] = calc_speed_u(values[j][k]);
     }
     // free(values[j]);
@@ -790,9 +789,12 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 // ----------------------------------------------------------------------------------------------------------------------------#
-f64 scale   = M_PI;
+f64 time    = 0;
 int bezier  = 0;
-int nstrips = NSTRIPS;
+int nstrips = 8;
+f64 umin    = 0, umax = 1, du = 1./12;
+f64 vmin    = 0, vmax = 1, dv = 1./12;
+f64 scale   = 1;
 
 char USAGE[] = 
 "USAGE  ./evert [-time T] [-bezier] [-nstrips N] [-scale S] [-umin Umin] [-umax Umax] [-du Ustep] [-vmin Vmin] [-vmax Vmax]  [-dv Vstep]\n\n\
@@ -807,20 +809,13 @@ DEFAULTS  -time 0  -nstrips 8 -scale 1  -umin 0 -umax 1 -du .08333  -vmin 0  -vm
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 int main(int argc, char** argv){
-  puts(SEP); puts(USAGE);
+  // puts(SEP); puts(USAGE);
   f64 corrstart   = .00;  //   These are the milestones where the animations "change phase"! =D
   f64 pushstart   = .10;
   f64 twiststart  = .23;
   f64 unpushstart = .60;
   f64 uncorrstart = .93;
-
-  f64 vmin = 0, umin = 0;
-  f64 vmax = 1, umax = 1;
-  f64 du   = 1./12;
-  f64 dv   = 1./12;
-
-  f64 time     = 0;
-  f64 bendtime = -1;   // -1 means don't do bendtime at all
+  f64 bendtime    = -1;   // -1 means don't do bendtime at all
 
   // ----------------------------------------------------------------------------------------------------------------------------#
   argv++;
@@ -843,10 +838,10 @@ int main(int argc, char** argv){
     print_scene(BendIn, umin, umax, du, vmin, vmax, dv, bendtime);
   else{
     // time = (time - howfar) / chunk
-    if(     time>=uncorrstart && uncorrstart>=0)  print_scene(UnCorrugate,umin,umax,du,vmin,vmax,dv, (time - uncorrstart) /  (1-uncorrstart));
-    else if(time>=unpushstart && unpushstart>=0)  print_scene(UnPush,     umin,umax,du,vmin,vmax,dv, (time - unpushstart) /  (((uncorrstart<0) ? 1. : uncorrstart) - unpushstart));
-    else if(time>=twiststart  && twiststart >=0)  print_scene(Twist,      umin,umax,du,vmin,vmax,dv, (time - twiststart)  /  (((unpushstart<0) ? 1. : unpushstart) - twiststart));
-    else if(time>=pushstart   && pushstart  >=0)  print_scene(PushThrough,umin,umax,du,vmin,vmax,dv, (time - pushstart)   /  (((twiststart <0) ? 1. : twiststart)  - pushstart));
-    else if(time>=corrstart   && corrstart  >=0)  print_scene(Corrugate,  umin,umax,du,vmin,vmax,dv, (time - corrstart)   /  (((pushstart  <0) ? 1. : pushstart)   - corrstart));
+    if(     time>=uncorrstart && uncorrstart>=0)  print_scene(UnCorrugate,umin,umax,du,vmin,vmax,dv, (time-uncorrstart) /  (1-uncorrstart));
+    else if(time>=unpushstart && unpushstart>=0)  print_scene(UnPush,     umin,umax,du,vmin,vmax,dv, (time-unpushstart) /  (((uncorrstart<0) ? 1 : uncorrstart) - unpushstart));
+    else if(time>=twiststart  && twiststart >=0)  print_scene(Twist,      umin,umax,du,vmin,vmax,dv, (time-twiststart)  /  (((unpushstart<0) ? 1 : unpushstart) - twiststart));
+    else if(time>=pushstart   && pushstart  >=0)  print_scene(PushThrough,umin,umax,du,vmin,vmax,dv, (time-pushstart)   /  (((twiststart <0) ? 1 : twiststart)  - pushstart));
+    else if(time>=corrstart   && corrstart  >=0)  print_scene(Corrugate,  umin,umax,du,vmin,vmax,dv, (time-corrstart)   /  (((pushstart  <0) ? 1 : pushstart)   - corrstart));
   }
 }
