@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------------------------------#
 CCX    = g++
-CFLAGS = -std=gnu11 -no-pie -fno-PIE -fno-pic -fno-PIC -fno-stack-protector -Wno-unused-result
+CFLAGS = -no-pie -fno-PIE -fno-pic -fno-PIC -fno-stack-protector -Wno-unused-result
 CFAST  = -Ofast -march=native -funroll-loops -flto -pipe -DNDEBUG
 CLIBS  = -lm
 

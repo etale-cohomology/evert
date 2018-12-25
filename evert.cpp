@@ -24,8 +24,8 @@ struct jet2_t{
   f64 fuv;
 
   jet2_t(){}
-  jet2_t(f64 d, f64 du, f64 dv){          f = d; fu = du; fv = dv; fuv = 0; }
-  jet2_t(f64 d, f64 du, f64 dv, f64 duv){ f = d; fu = du; fv = dv; fuv = duv; }
+  jet2_t(f64 d, f64 du, f64 dv){           f = d; fu = du; fv = dv; fuv = 0;  }
+  jet2_t(f64 d, f64 du, f64 dv, f64 duv){  f = d; fu = du; fv = dv; fuv = duv;  }
 
   f64  df_du(){     return fu;  }
   f64  df_dv(){     return fv;  }
@@ -46,7 +46,7 @@ struct jet2_t{
   }
   void operator*=(f64 d){  f *= d; fu *= d; fv *= d; fuv *= d;  }
   void operator%=(f64 d){  f = fmod(f, d); if(f < 0) f += d;  }
-  // void operator^=(f64 n){  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+  // void operator^=(f64 n){  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   //   if(f>0){
   //     f64 x0 = pow(f, n);
   //     f64 x1 = n * x0/f;
@@ -62,13 +62,13 @@ struct jet2_t{
   //   else if(index == 1)  fv = 0;
   //   fuv = 0;
   // }
-  // void Sin(){  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+  // void Sin(){  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   //   *this *= 2*M_PI;
   //   f64 s  = sin(f);
   //   f64 c  = cos(f);
   //   f      = s; fu = fu*c; fv = fv*c; fuv = c*fuv - s*fu*fv;
   // }
-  // void Cos(){  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+  // void Cos(){  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   //   *this *= 2*M_PI;
   //   f64 s  = cos(f);
   //   f64 c  = -sin(f);
@@ -89,44 +89,31 @@ struct jet2_t{
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-jet2_t operator+(const jet2_t x, const jet2_t y){
+jet2_t operator+(const jet2_t x, const jet2_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   return jet2_t(x.f   + y.f,
                 x.fu  + y.fu,
                 x.fv  + y.fv,
                 x.fuv + y.fuv);  }
-jet2_t operator*(const jet2_t x, const jet2_t y){
+
+jet2_t operator*(const jet2_t x, const jet2_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   return jet2_t(x.f*y.f,
                 x.f*y.fu  + x.fu*y.f,
                 x.f*y.fv  + x.fv*y.f,
                 x.f*y.fuv + x.fu*y.fv + x.fv*y.fu + x.fuv*y.f);  }
-jet2_t operator+(const jet2_t x, f64 d){
+
+jet2_t operator+(const jet2_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   return jet2_t(x.f + d,
                 x.fu,
                 x.fv,
                 x.fuv);  }
-jet2_t operator*(const jet2_t x, f64 d){
+
+jet2_t operator*(const jet2_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   return jet2_t(d*x.f,
                 d*x.fu,
                 d*x.fv,
                 d*x.fuv);  }
-jet2_t Sin(const jet2_t x){
-  jet2_t t = x*(2*M_PI);
-  f64 s    = sin(t.f);
-  f64 c    = cos(t.f);
-  return jet2_t(s,
-                c*t.fu,
-                c*t.fv,
-                c*t.fuv - s*t.fu*t.fv);  }
-jet2_t Cos(const jet2_t x){
-  jet2_t t = x*(2*M_PI);
-  f64 s    =  cos(t.f);
-  f64 c    = -sin(t.f);
-  return jet2_t(s,
-                c*t.fu,
-                c*t.fv,
-                c*t.fuv - s*t.fu*t.fv);
-}
-jet2_t operator^(const jet2_t x, f64 n){
+
+jet2_t operator^(const jet2_t x, f64 n){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   f64 x0 = pow(x.f, n);
   f64 x1 = (x.f == 0) ? 0 : n     * x0 / x.f;
   f64 x2 = (x.f == 0) ? 0 : (n-1) * x1 / x.f;
@@ -135,12 +122,34 @@ jet2_t operator^(const jet2_t x, f64 n){
                 x1*x.fv,
                 x1*x.fuv + x2*x.fu*x.fv);
 }
-jet2_t Annihilate( const jet2_t x, int index){
+
+jet2_t Sin(const jet2_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+  jet2_t t = x*(2*M_PI);
+  f64 s    = sin(t.f);
+  f64 c    = cos(t.f);
+  return jet2_t(s,
+                c*t.fu,
+                c*t.fv,
+                c*t.fuv - s*t.fu*t.fv);  }
+
+jet2_t Cos(const jet2_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+  jet2_t t = x*(2*M_PI);
+  f64 s    =  cos(t.f);
+  f64 c    = -sin(t.f);
+  return jet2_t(s,
+                c*t.fu,
+                c*t.fv,
+                c*t.fuv - s*t.fu*t.fv);
+}
+
+jet2_t Annihilate( const jet2_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   return jet2_t(x.f,
                 index == 1 ? x.fu : 0,
                 index == 0 ? x.fv : 0,
                 0);  }
-jet2_t Interpolate(const jet2_t v1, const jet2_t v2, const jet2_t weight){  return (v1) * ((weight) * (-1) + 1) + v2*weight;  }
+
+jet2_t Interpolate(const jet2_t v1, const jet2_t v2, const jet2_t weight){  return (v1) * ((weight) * (-1) + 1.) + v2*weight;  }
+
 void jet_show(const jet2_t v){  printf("%f (%f %f)\n", v.f, v.fu, v.fv);  }
 
 
@@ -181,12 +190,12 @@ class jet3_t{
   friend jet3_t operator^(  const jet3_t x, f64 n);
   friend jet3_t Annihilate( const jet3_t x, int index);
   friend jet3_t Interpolate(const jet3_t v1, const jet3_t v2, const jet3_t weight);
-  friend void     jet_show(   const jet3_t);
-  friend class    jet2_t D(   const class jet3_t x, int index);
+  friend void   jet_show(   const jet3_t);
+  friend class  jet2_t D(   const class jet3_t x, int index);
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-jet3_t operator+(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
+jet3_t operator+(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   jet3_t result;
   result.f    = x.f + y.f;
   result.fu   = x.fu + y.fu;
@@ -199,7 +208,7 @@ jet3_t operator+(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:
   return result;
 }
 
-jet3_t operator*(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
+jet3_t operator*(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   jet3_t result;
   result.f    = x.f*y.f;
   result.fu   = x.f*y.fu + x.fu*y.f;
@@ -212,14 +221,14 @@ jet3_t operator*(const jet3_t x, const jet3_t y){  // printf("\x1b[32m%s\x1b[0m:
   return result;
 }
 
-jet3_t operator+(const jet3_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
+jet3_t operator+(const jet3_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   jet3_t result;
   result   = x;
   result.f+= d;
   return result;
 }
 
-jet3_t operator*(const jet3_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
+jet3_t operator*(const jet3_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   jet3_t result;
   result.f    = d*x.f;
   result.fu   = d*x.fu;
@@ -232,7 +241,7 @@ jet3_t operator*(const jet3_t x, f64 d){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m
   return result;
 }
 
-jet3_t Sin(const jet3_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+jet3_t Sin(const jet3_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   jet3_t result;
   jet3_t t  = x*(2*M_PI);
   f64 s       = sin(t.f);
@@ -248,7 +257,7 @@ jet3_t Sin(const jet3_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x
   return result;
 }
 
-jet3_t Cos(const jet3_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+jet3_t Cos(const jet3_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   jet3_t result;
   jet3_t t  = x*(2*M_PI);
   f64 s       = cos(t.f);
@@ -264,7 +273,7 @@ jet3_t Cos(const jet3_t x){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x
   return result;
 }
 
-jet3_t operator^(const jet3_t x, f64 n){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
+jet3_t operator^(const jet3_t x, f64 n){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet3_t");
   f64 x0      = pow(x.f, n);
   f64 x1      = (x.f == 0) ? 0 : n * x0/x.f;
   f64 x2      = (x.f == 0) ? 0 : (n-1) * x1/x.f;
@@ -281,7 +290,7 @@ jet3_t operator^(const jet3_t x, f64 n){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m
   return result;
 }
 
-jet2_t D(const jet3_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
+jet2_t D(const jet3_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "jet2_t");
   jet2_t result;
   if(index == 0){
     result.f   = x.fu;
@@ -313,7 +322,7 @@ jet3_t Annihilate(const jet3_t x, int index){
 }
 
 jet3_t Interpolate(const jet3_t v1, const jet3_t v2, const jet3_t weight){
-  return (v1) * ((weight) * (-1) + 1) + v2*weight;
+  return (v1) * ((weight) * (-1) + 1.) + v2*weight;
 }
 
 void jet_show(const jet3_t v){  printf("%f (%f %f)\n", v.f, v.fu, v.fv);  }
@@ -328,7 +337,7 @@ struct vec_jet2_t{
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-vec_jet2_t operator+(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t operator+(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
   result.x = v.x + w.x;
   result.y = v.y + w.y;
@@ -336,7 +345,7 @@ vec_jet2_t operator+(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:
   return result;
 }
 
-vec_jet2_t operator*(vec_jet2_t v, jet2_t  a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t operator*(vec_jet2_t v, jet2_t  a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
   result.x = v.x*a;
   result.y = v.y*a;
@@ -344,7 +353,7 @@ vec_jet2_t operator*(vec_jet2_t v, jet2_t  a){  // printf("\x1b[32m%s\x1b[0m:L\x
   return result;
 }
 
-vec_jet2_t operator*(vec_jet2_t v, f64 a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t operator*(vec_jet2_t v, f64 a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
   result.x = v.x*a;
   result.y = v.y*a;
@@ -352,7 +361,7 @@ vec_jet2_t operator*(vec_jet2_t v, f64 a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[9
   return result;
 }
 
-vec_jet2_t AnnihilateVec(vec_jet2_t v, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t AnnihilateVec(vec_jet2_t v, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
   result.x = Annihilate(v.x, index);
   result.y = Annihilate(v.y, index);
@@ -360,60 +369,60 @@ vec_jet2_t AnnihilateVec(vec_jet2_t v, int index){  // printf("\x1b[32m%s\x1b[0m
   return result;
 }
 
-vec_jet2_t Cross(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t Cross(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
-  result.x = v.y*w.z + v.z*w.y*-1;
-  result.y = v.z*w.x + v.x*w.z*-1;
-  result.z = v.x*w.y + v.y*w.x*-1;
+  result.x = v.y*w.z + v.z*w.y*-1.;
+  result.y = v.z*w.x + v.x*w.z*-1.;
+  result.z = v.x*w.y + v.y*w.x*-1.;
   return result;
 }
 
-jet2_t Dot(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+jet2_t Dot(vec_jet2_t v, vec_jet2_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   return v.x*w.x + v.y*w.y + v.z*w.z;
 }
 
-vec_jet2_t Normalize(vec_jet2_t v){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t Normalize(vec_jet2_t v){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   jet2_t a = Dot(v,v);
-  if(a > 0)  a = a^-0.5;
-  else       a = jet2_t(0, 0, 0);
+  if(a>0.)  a = a^-0.5;
+  else      a = jet2_t(0,0,0);
   return v*a;
 }
 
-vec_jet2_t RotateZ(vec_jet2_t v, jet2_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t RotateZ(vec_jet2_t v, jet2_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   jet2_t s = Sin(angle);
   jet2_t c = Cos(angle);
   vec_jet2_t result;
-  result.x =          v.x*c + v.y*s;
-  result.y = v.x*s*-1 + v.y*c;
+  result.x = v.x*c     + v.y*s;
+  result.y = v.x*s*-1. + v.y*c;
   result.z = v.z;
   return result;
 }
 
-vec_jet2_t RotateY(vec_jet2_t v, jet2_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t RotateY(vec_jet2_t v, jet2_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
   jet2_t s = Sin(angle);
   jet2_t c = Cos(angle);
-  result.x = v.x*c + v.z*s*-1;
+  result.x = v.x*c + v.z*s*-1.;
   result.y = v.y;
   result.z = v.x*s + v.z*c    ;
   return result;
 }
 
-vec_jet2_t RotateX(vec_jet2_t v, jet2_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+vec_jet2_t RotateX(vec_jet2_t v, jet2_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   vec_jet2_t result;
   jet2_t s = Sin(angle);
   jet2_t c = Cos(angle);
   result.x = v.x;
   result.y = v.y*c + v.z*s;
-  result.z = v.y*s*-1 + v.z*c;
+  result.z = v.y*s*-1. + v.z*c;
   return result;
 }
 
-vec_jet2_t InterpolateVec(vec_jet2_t v1, vec_jet2_t v2, jet2_t weight){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
-  return (v1) * (weight*-1 + 1) + v2*weight;
+vec_jet2_t InterpolateVec(vec_jet2_t v1, vec_jet2_t v2, jet2_t weight){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+  return (v1) * (weight*-1. + 1.) + v2*weight;
 }
 
-jet2_t Length(vec_jet2_t v){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
+jet2_t Length(vec_jet2_t v){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet2_t");
   return (v.x^2 + v.y^2) ^ (.5);
 }
 
@@ -426,7 +435,7 @@ struct vec_jet3_t{
 };
 
 // ----------------------------------------------------------------------------------------------------------------------------#
-vec_jet3_t operator+(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t operator+(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   result.x = v.x + w.x;
   result.y = v.y + w.y;
@@ -434,7 +443,7 @@ vec_jet3_t operator+(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:
   return result;
 }
 
-vec_jet3_t operator*(vec_jet3_t v, jet3_t  a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t operator*(vec_jet3_t v, jet3_t  a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   result.x = v.x*a;
   result.y = v.y*a;
@@ -442,7 +451,7 @@ vec_jet3_t operator*(vec_jet3_t v, jet3_t  a){  // printf("\x1b[32m%s\x1b[0m:L\x
   return result;
 }
 
-vec_jet3_t operator*(vec_jet3_t v, f64 a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t operator*(vec_jet3_t v, f64 a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   result.x = v.x*a;
   result.y = v.y*a;
@@ -450,7 +459,7 @@ vec_jet3_t operator*(vec_jet3_t v, f64 a){  // printf("\x1b[32m%s\x1b[0m:L\x1b[9
   return result;
 }
 
-vec_jet3_t AnnihilateVec(vec_jet3_t v, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t AnnihilateVec(vec_jet3_t v, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   result.x = Annihilate(v.x, index);
   result.y = Annihilate(v.y, index);
@@ -458,7 +467,7 @@ vec_jet3_t AnnihilateVec(vec_jet3_t v, int index){  // printf("\x1b[32m%s\x1b[0m
   return result;
 }
 
-vec_jet2_t D(vec_jet3_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet2_t D(vec_jet3_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet2_t result;
   result.x = D(x.x, index);
   result.y = D(x.y, index);
@@ -466,56 +475,56 @@ vec_jet2_t D(vec_jet3_t x, int index){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d
   return result;
 }
 
-vec_jet3_t Cross(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t Cross(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
-  result.x = v.y*w.z + v.z*w.y*-1;
-  result.y = v.z*w.x + v.x*w.z*-1;
-  result.z = v.x*w.y + v.y*w.x*-1;
+  result.x = v.y*w.z + v.z*w.y*-1.;
+  result.y = v.z*w.x + v.x*w.z*-1.;
+  result.z = v.x*w.y + v.y*w.x*-1.;
   return result;
 }
 
-jet3_t Dot(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+jet3_t Dot(vec_jet3_t v, vec_jet3_t w){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   return v.x*w.x + v.y*w.y + v.z*w.z;
 }
 
-vec_jet3_t Normalize(vec_jet3_t v){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t Normalize(vec_jet3_t v){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   jet3_t a = Dot(v,v);
-  if(a > 0)  a = a^-0.5;
-  else       a = jet3_t(0, 0, 0);
+  if(a>0.)  a = a^-0.5;
+  else      a = jet3_t(0,0,0);
   return v*a;
 }
 
-vec_jet3_t RotateZ(vec_jet3_t v, jet3_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t RotateZ(vec_jet3_t v, jet3_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   jet3_t s = Sin(angle);
   jet3_t c = Cos(angle);
-  result.x =          v.x*c + v.y*s;
-  result.y = v.x*s*-1 + v.y*c;
+  result.x = v.x*c     + v.y*s;
+  result.y = v.x*s*-1. + v.y*c;
   result.z = v.z;
   return result;
 }
 
-vec_jet3_t RotateY(vec_jet3_t v, jet3_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t RotateY(vec_jet3_t v, jet3_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   jet3_t s = Sin(angle);
   jet3_t c = Cos(angle);
-  result.x   = v.x*c + v.z*s*-1;
+  result.x   = v.x*c + v.z*s*-1.;
   result.y   = v.y;
   result.z   = v.x*s + v.z*c    ;
   return result;
 }
 
-vec_jet3_t RotateX(vec_jet3_t v, jet3_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
+vec_jet3_t RotateX(vec_jet3_t v, jet3_t angle){  // printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  %s\n", __FILE__, __LINE__, __func__, "vec_jet3_t");
   vec_jet3_t result;
   jet3_t s = Sin(angle);
   jet3_t c = Cos(angle);
   result.x   = v.x;
-  result.y   = v.y*c + v.z*s;
-  result.z   = v.y*s*-1 + v.z*c;
+  result.y   = v.y*c     + v.z*s;
+  result.z   = v.y*s*-1. + v.z*c;
   return result;
 }
 
-vec_jet3_t InterpolateVec(vec_jet3_t v1, vec_jet3_t v2, jet3_t weight){  return (v1) * (weight*-1 + 1) + v2*weight;  }
+vec_jet3_t InterpolateVec(vec_jet3_t v1, vec_jet3_t v2, jet3_t weight){  return (v1) * (weight*-1. + 1.) + v2*weight;  }
 jet3_t Length(vec_jet3_t v){  return (v.x^2 + v.y^2) ^ (.5);  }
 
 
@@ -528,22 +537,22 @@ extern int nstrips;
 
 vec_jet2_t FigureEight(vec_jet2_t w, vec_jet2_t h, vec_jet2_t bend, jet2_t form, jet2_t v){
   jet2_t height;
-  v %= 1;
-  height = (Cos(v*2) + -1) * (-1);
-  if(v > 0.25 && v < 0.75)  height = height*-1 + 4;
+  v      %= 1;
+  height = (Cos(v*2.) + -1.) * (-1.);
+  if(v > 0.25 && v < 0.75)  height = height*-1. + 4.;
   height = height*0.6;
-  h = h + bend*(height*height*(1/64.));
-  return w*Sin(v*2) + (h) * (Interpolate((Cos(v) + -1) * (-2), height, form));
+  h      = h + bend*(height*height*(1/64.));
+  return w*Sin(v*2.) + (h) * (Interpolate((Cos(v) + -.1) * (-2.), height, form));
 }
   
 vec_jet2_t AddFigureEight(vec_jet3_t p, jet3_t u, jet2_t v, jet3_t form, jet3_t scale){
-  jet3_t size = form*scale;
-  form          = form*2 + form*form*-1;
-  vec_jet2_t dv  = AnnihilateVec(D(p, 1), 1);
+  jet3_t size   = form*scale;
+  form          = form*2. + form*form*-1.;
+  vec_jet2_t dv = AnnihilateVec(D(p, 1), 1);
   p             = AnnihilateVec(p, 1);
-  vec_jet2_t du  = Normalize(D(p, 0));
-  vec_jet2_t h   = Normalize(Cross(du, dv))*jet2_t(size);
-  vec_jet2_t w   = Normalize(Cross(h, du))*(jet2_t(size)*1.1);
+  vec_jet2_t du = Normalize(D(p, 0));
+  vec_jet2_t h  = Normalize(Cross(du, dv))*jet2_t(size);
+  vec_jet2_t w  = Normalize(Cross(h, du))*(jet2_t(size)*1.1);
   return RotateZ(vec_jet2_t(p) + FigureEight(w, h, du*D(size, 0)*(D(u, 0)^(-1)), form, v), v*(1./nstrips));
 }
 
@@ -571,17 +580,17 @@ vec_jet3_t Straight(jet3_t u, jet3_t v, f64 xsize, f64 ysize, f64 zsize){
 jet3_t Param1(jet3_t x){
   f64 offset = 0;
   x %= 4;
-  if(x > 2){  x = x+(-2); offset = 2;  }
-  if(x <= 1)  return x*2 + (x^2)*(-1) + offset;
-  else        return (x^2) + x*(-2) + (2 + offset);
+  if(x>2.){  x = x+(-2.); offset = 2;  }
+  if(x<=1.)  return x*2. + (x^2)*(-1.) + offset;
+  else       return (x^2) + x*(-2.) + (2 + offset);
 }
 
 jet3_t Param2(jet3_t x){
   f64 offset = 0;
   x %= 4;
-  if(x > 2){ x = x+(-2); offset = 2; }
-  if(x <= 1) return (x^2) + offset;
-  else return (x^2)*(-1) + x*4 + (-2 + offset);
+  if(x>2.){  x = x+(-2.); offset = 2; }
+  if(x<=1.)  return (x^2) + offset;
+  else         return (x^2)*(-1.) + x*4. + (-2 + offset);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
@@ -589,24 +598,24 @@ jet3_t TInterp(f64 x){  return jet3_t(x,0,0);  }
 
 jet3_t UInterp(jet3_t x){
   x %= 2;
-  if(x > 1)  x = x*(-1) + 2;
-  return (x^2)*3 + (x^3) * (-2);
+  if(x > 1.)  x = x*(-1.) + 2.;
+  return (x^2)*3. + (x^3) * (-2.);
 }
 
-#define FFPOW 3
+#define FFPOW 3.
 jet3_t FFInterp(jet3_t x){
   x %= 2;
-  if(x > 1)  x = x*(-1) + 2;
+  if(x>1.)  x = x*(-1.) + 2.;
   x = x*1.06 + -0.05;
-  if(     x < 0)  return jet3_t(0, 0, 0);
-  else if(x > 1)  return jet3_t(0, 0, 0) + 1;
-  else            return (x ^ (FFPOW-1)) * (FFPOW) + (x^FFPOW) * (-FFPOW+1);
+  if(     x<0.)  return jet3_t(0,0,0);
+  else if(x>1.)  return jet3_t(0,0,0) + 1.;
+  else           return (x ^ (FFPOW-1)) * (FFPOW) + (x^FFPOW) * (-FFPOW+1);
 }
 
-#define FSPOW 3
+#define FSPOW 3.
 jet3_t FSInterp(jet3_t x){
   x %= 2;
-  if(x > 1)  x = x*(-1) + 2;
+  if(x>1.)  x = x*(-1.) + 2.;
   return ((x ^ (FSPOW-1)) * (FSPOW) + (x^FSPOW) * (-FSPOW+1)) * (-0.2);
 }
 
@@ -621,7 +630,7 @@ vec_jet3_t Scene01(jet3_t u, jet3_t v, f64 t){  return InterpolateVec(Stage0(u,v
 vec_jet3_t Scene12(jet3_t u, jet3_t v, f64 t){  return InterpolateVec(Stage1(u,v), Stage2(u,v), TInterp(t));  }
 vec_jet3_t Scene23(jet3_t u, jet3_t v, f64 t){
   t = TInterp(t) * 0.5;
-  f64 tt = (u <= 1) ? t : -t;
+  f64 tt = (u<=1.) ? t : -t;
   return InterpolateVec(RotateZ(Arc(Param1(u), v, 0.9, 0.9,-1), jet3_t(tt,0,0)), RotateY(Arc(Param2(u), v, 1, 1, 0.5), jet3_t(t,0,0)), UInterp(u)
   );
 }
@@ -645,7 +654,7 @@ extern int nstrips;
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 void print_point(vec_jet2_t p, f64 ps, f64 pus, f64 pvs, f64 puvs){
-  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
+  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
   if(bezier){
     f64 xyz[3];
     xyz[0] = f64(p.x)*ps + p.x.df_du()*pus/3. + p.x.df_dv()*pvs/3. + p.x.d2f_dudv()*puvs/9.;
@@ -667,7 +676,7 @@ void print_point(vec_jet2_t p, f64 ps, f64 pus, f64 pvs, f64 puvs){
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 void print_mesh(vec_jet2_t p){  // Main mesh-printing function?
-  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
+  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m  ", __FILE__, __LINE__, __func__);
   f64 x  = f64(p.x);
   f64 y  = f64(p.y);
   f64 z  = f64(p.z);
@@ -681,7 +690,7 @@ void print_mesh(vec_jet2_t p){  // Main mesh-printing function?
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 void print_spline(vec_jet2_t v00, vec_jet2_t v01, vec_jet2_t v10, vec_jet2_t v11, f64 us, f64 vs, f64 s0, f64 s1, f64 t0, f64 t1){ 
-  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
+  printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
   if(bezier){
     print_point(v00, 1,  0, 0, 0);
     print_point(v00, 1, us, 0, 0);
@@ -718,7 +727,7 @@ f64 calc_speed_u(vec_jet2_t v){  return sqrt(sqr(v.x.df_du()) + sqr(v.y.df_du())
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f64 vmax, f64 adv, f64 t){
-  puts(SEP); printf("\x1b[32m%s\x1b[0m:L\x1b[94m%d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
+  puts(SEP); printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
   int jmax = (fabs(umax-umin)/adu + .5);  if(jmax == 0)  jmax = 1;
   int kmax = (fabs(vmax-vmin)/adv + .5);  if(kmax == 0)  kmax = 1;
   f64 du   = (umax-umin) / jmax;
@@ -774,8 +783,8 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
 
 // ----------------------------------------------------------------------------------------------------------------------------#
 // ----------------------------------------------------------------------------------------------------------------------------#
-f64 scale    = M_PI;
-int bezier   = 0;
+f64 scale   = M_PI;
+int bezier  = 0;
 int nstrips = NSTRIPS;
 
 char USAGE[] = 
