@@ -590,7 +590,7 @@ jet3_t Param2(jet3_t x){
   x %= 4;
   if(x>2.){  x = x+(-2.); offset = 2; }
   if(x<=1.)  return (x^2) + offset;
-  else         return (x^2)*(-1.) + x*4. + (-2 + offset);
+  else       return (x^2)*(-1.) + x*4. + (-2 + offset);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------#
@@ -692,31 +692,31 @@ void print_mesh(vec_jet2_t p){  // Main mesh-printing function?
 void print_spline(vec_jet2_t v00, vec_jet2_t v01, vec_jet2_t v10, vec_jet2_t v11, f64 us, f64 vs, f64 s0, f64 s1, f64 t0, f64 t1){ 
   printf("\x1b[32m%s\x1b[0m:L\x1b[94m%3d\x1b[0m  \x1b[31m%-16s\x1b[0m\n", __FILE__, __LINE__, __func__);
   if(bezier){
-    print_point(v00, 1,  0, 0, 0);
-    print_point(v00, 1, us, 0, 0);
-    print_point(v10, 1,-us, 0, 0);
-    print_point(v10, 1,  0, 0, 0);
+    print_point(v00,1,  0, 0, 0);
+    print_point(v00,1, us, 0, 0);
+    print_point(v10,1,-us, 0, 0);
+    print_point(v10,1,  0, 0, 0);
   
-    print_point(v00, 1,  0, vs,     0);
-    print_point(v00, 1, us, vs, us*vs);
-    print_point(v10, 1,-us, vs,-us*vs);
-    print_point(v10, 1,  0, vs,     0);
+    print_point(v00,1,  0, vs,     0);
+    print_point(v00,1, us, vs, us*vs);
+    print_point(v10,1,-us, vs,-us*vs);
+    print_point(v10,1,  0, vs,     0);
   
-    print_point(v01, 1, 0,-vs, 0);
-    print_point(v01, 1, us,-vs,-us*vs);
-    print_point(v11, 1,-us,-vs, us*vs);
-    print_point(v11, 1, 0,-vs, 0);
+    print_point(v01,1,  0,-vs, 0);
+    print_point(v01,1, us,-vs,-us*vs);
+    print_point(v11,1,-us,-vs, us*vs);
+    print_point(v11,1,  0,-vs, 0);
   
-    print_point(v01, 1, 0, 0, 0);
-    print_point(v01, 1, us, 0, 0);
-    print_point(v11, 1,-us, 0, 0);
-    print_point(v11, 1, 0, 0, 0);
+    print_point(v01,1,  0, 0, 0);
+    print_point(v01,1, us, 0, 0);
+    print_point(v11,1,-us, 0, 0);
+    print_point(v11,1,  0, 0, 0);
     printf("%g %g  %g %g  %g %g  %g %g\n\n", s0,t0,  s1,t0,  s0,t1, s1,t1);
   }else{
-    print_point(v00, 1, us, vs, us*vs);
-    print_point(v10, 1, us, vs, us*vs);
-    print_point(v11, 1, us, vs, us*vs);
-    print_point(v01, 1, us, vs, us*vs);
+    print_point(v00,1, us, vs, us*vs);
+    print_point(v10,1, us, vs, us*vs);
+    print_point(v11,1, us, vs, us*vs);
+    print_point(v01,1, us, vs, us*vs);
     putchar('\n');
   }
 }
@@ -735,9 +735,9 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
 
   // ----------------------------------------------------------------------------------------------------------------------------#
   f64 u, v;
-  static vec_jet2_t** values = (vec_jet2_t**)calloc(jmax+1, sizeof(vec_jet2_t *));
-  f64*  speedv = (f64*)calloc(jmax+1, sizeof(f64));
-  f64** speedu = (f64**)calloc(jmax+1, sizeof(f64 *));
+  static vec_jet2_t** values = (vec_jet2_t**)calloc(jmax+1, sizeof(vec_jet2_t*));
+  f64*  speedv = (f64*) calloc(jmax+1, sizeof(f64));
+  f64** speedu = (f64**)calloc(jmax+1, sizeof(f64*));
 
   for(int j=0; j <= jmax; ++j){
     u = umin + j*du;
@@ -753,6 +753,8 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
       values[j][k] = (*func)(jet3_t(u, 1, 0), jet3_t(v, 0, 1), t);
       speedu[j][k] = calc_speed_u(values[j][k]);
     }
+    free(values[j]);
+    free(speedu[j]);
   }
 
   // ----------------------------------------------------------------------------------------------------------------------------#
@@ -778,6 +780,9 @@ void print_scene(surface_time_fn* func, f64 umin, f64 umax, f64 adu, f64 vmin, f
   }
 
   printf("}\n");
+  free(values);
+  free(speedv);
+  free(speedu);
 }
 
 
