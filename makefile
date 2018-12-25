@@ -1,17 +1,21 @@
-CC = g++
-CFLAGS = -fpermissive
-LIBS = -lm
+# -----------------------------------------------------------------------------------------------------------------------------#
+CCX    = g++
+CFLAGS = -std=gnu11 -no-pie -fno-PIE -fno-pic -fno-PIC -fno-stack-protector -Wno-unused-result
+CFAST  = -Ofast -march=native -funroll-loops -flto -pipe -DNDEBUG
+CLIBS  = -lm
 
-SPHEREOBJS= sphere.o evert.o threejet.o threejetvec.o spline.o figureeight.o twojet.o twojetvec.o
-
-.cpp.o:
-	$(CC) $(CFLAGS) -c ${@:o=cpp}
-
-evert: $(SPHEREOBJS)
-	$(CC) $(CFLAGS) $(SPHEREOBJS) $(LIBS) -o evert
+# -----------------------------------------------------------------------------------------------------------------------------#
+all: evert
 
 clean:
-	rm -f $(SPHEREOBJS) evert
+	rm -f evert
+
+# -----------------------------------------------------------------------------------------------------------------------------#
+evert: evert.cpp makefile
+	$(CCX) $< -o $@ $(CFLAGS) $(CLIBS)
+
+release: evert.cpp makefile
+	$(CCX) $< -o $@ $(CFLAGS) $(CLIBS) $(CFAST)
 
 manual:
 	latex manual
